@@ -11,17 +11,20 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
         maven(url = uri("https://jitpack.io"))
-      }
+    }
 }
 
-rootProject.name = "ConnectionTesting"
+rootProject.name = "Dog"
+
 include(":loggly")
 include(":dog")
 include(":dog-compose")
 include(":dog-app")
+

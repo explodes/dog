@@ -45,18 +45,5 @@ internal abstract class ServerViewModel : ViewModel() {
         }
     }
 
-    data class UiState(
-        val devices: List<Device> = emptyList()
-        //        val lobby: Versioned<LobbyInformation> = Versioned.of(LobbyInformation()),
-        //        val serverState: ServerState = ServerState.WAITING,
-    )
-    //
-    //    data class LobbyInformation(
-    //        val clients: Collection<ConnectionInformation> = emptyList(),
-    //    )
-    //
-    //    enum class ServerState {
-    //        WAITING, LOBBY,
-    //    }
-
+    data class UiState(val devices: List<Device> = emptyList())
 }
