@@ -21,7 +21,6 @@ import java.io.OutputStream
 import java.net.Socket
 
 abstract class NsdPartialIdentityLink(
-    override val chainId: ChainId,
     connection: LinkedConnection,
     private val socket: Socket,
     logger: Logger,
@@ -41,6 +40,7 @@ abstract class NsdPartialIdentityLink(
         userInfo = userInfo,
         protocol = protocol,
     ) {
+
     override fun createSocket(): ReaderWriterCloser {
         return object : ReaderWriterCloser {
             override val inputStream: InputStream

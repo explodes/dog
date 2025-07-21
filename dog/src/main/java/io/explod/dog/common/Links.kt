@@ -3,7 +3,6 @@
 package io.explod.dog.common
 
 import android.content.Context
-import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState
 import io.explod.dog.conn.FullIdentityLink
@@ -24,6 +23,7 @@ import io.explod.dog.util.ReaderWriterCloser
 import io.explod.dog.util.Result
 import io.explod.dog.util.Result.Companion.Err
 import io.explod.dog.util.Result.Companion.Ok
+import io.explod.dog.util.mapOk
 import io.explod.loggly.Logger
 import java.io.IOException
 import kotlin.concurrent.atomics.AtomicReference
@@ -37,7 +37,7 @@ abstract class IOPartialIdentityLink(
     private var currentFullIdentity: FullIdentity,
     protected val protocol: Protocol,
     protected val userInfo: UserInfo,
-) : PartialIdentityLink() {
+) : PartialIdentityLink(connection.chainId) {
 
     protected val socketRef = AtomicReference<ReaderWriterCloser?>(null)
 
@@ -75,6 +75,7 @@ abstract class IOPartialIdentityLink(
                 }
             return createFullIdentityLink(socket)
                 .ok { link -> connection.setLink(link, ConnectionState.OPENING) }
+                .mapOk { it as Link }
                 .err { closeLink(connection, socket, logger, ConnectionState.ERROR) }
         } catch (ex: IOException) {
             closeLink(connection, socket, logger, ConnectionState.ERROR)
@@ -89,7 +90,7 @@ abstract class IOPartialIdentityLink(
         }
     }
 
-    abstract fun createFullIdentityLink(socket: ReaderWriterCloser): Result<Link, FailureReason>
+    abstract fun createFullIdentityLink(socket: ReaderWriterCloser): Result<FullIdentityLink, FailureReason>
 
     override fun getFullIdentity(): FullIdentity {
         return currentFullIdentity
@@ -106,14 +107,13 @@ abstract class IOPartialIdentityLink(
 }
 
 abstract class IOFullIdentityLink(
-    chainId: ChainId,
     protected val connection: LinkedConnection,
     protected val socket: ReaderWriterCloser,
     protected val logger: Logger,
     private val currentPartialIdentity: PartialIdentity,
     private val currentFullIdentity: FullIdentity,
     protected val protocol: Protocol,
-) : FullIdentityLink(chainId) {
+) : FullIdentityLink(connection.chainId) {
 
     override suspend fun advance(join: Protocol.Join): Result<ConnectedLink, FailureReason> {
         handleJoin(connection, socket, logger) {
@@ -144,13 +144,12 @@ abstract class IOFullIdentityLink(
 
 /** At least for now, the implementation is identical between Sever and Client. */
 abstract class IOConnectedLink(
-    chainId: ChainId,
     protected val connection: LinkedConnection,
     private val socket: ReaderWriterCloser,
     protected val logger: Logger,
     private val currentPartialIdentity: PartialIdentity,
     private val currentFullIdentity: FullIdentity,
-) : ConnectedLink(chainId) {
+) : ConnectedLink(connection.chainId) {
     override suspend fun send(bytes: ByteArray): Result<Ok, FailureReason> {
         try {
             socket.outputStream.write(bytes)

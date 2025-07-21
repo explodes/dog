@@ -69,7 +69,6 @@ internal class BondStateBroadcastReceiver(
 }
 
 abstract class RfcommPartialIdentityLink(
-    override val chainId: ChainId,
     connection: LinkedConnection,
     private val device: BluetoothDevice,
     logger: Logger,
@@ -89,6 +88,7 @@ abstract class RfcommPartialIdentityLink(
         userInfo = userInfo,
         protocol = protocol,
     ) {
+
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun isBonded(): Boolean {
         return device.bondState == BluetoothDevice.BOND_BONDED
@@ -159,7 +159,7 @@ abstract class RfcommPartialIdentityLink(
                     if (isBonded()) {
                         logger.debug("Got bonded device state: ${device.deviceString}")
                         receiverBondStateDeferred.complete(true)
-                        break
+                        return@async true
                     }
                     delay(BONDING_POLL_DELAY)
                 }
@@ -176,13 +176,10 @@ abstract class RfcommPartialIdentityLink(
             select {
                 await.onAwait {}
                 loop.onAwait {}
-                onTimeout(BONDING_TIMEOUT) {
-                    logger.debug("Timeout waiting for bonding.")
-                    await.cancel()
-                    loop.cancel()
-                    isBonded()
-                }
+                onTimeout(BONDING_TIMEOUT) { logger.debug("Timeout waiting for bonding.") }
             }
+            await.cancel()
+            loop.cancel()
             logger.debug("pollBondStatesWithTimeout exiting for device ${device.deviceString}")
             isBonded()
         }

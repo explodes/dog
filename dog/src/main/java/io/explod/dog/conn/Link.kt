@@ -28,7 +28,7 @@ sealed class Link {
     internal abstract suspend fun close()
 }
 
-abstract class PartialIdentityLink : Link() {
+abstract class PartialIdentityLink(override val chainId: ChainId) : Link() {
     /**
      * Advances to the next Link state. If bonding is allowed and required, user-interaction will be
      * necessary to complete bonding!

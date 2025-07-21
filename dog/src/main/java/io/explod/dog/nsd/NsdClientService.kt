@@ -10,6 +10,7 @@ import io.explod.dog.common.RetrySignalConf
 import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState
+import io.explod.dog.conn.FullIdentityLink
 import io.explod.dog.conn.Link
 import io.explod.dog.conn.LinkListener
 import io.explod.dog.conn.LinkedConnection
@@ -301,7 +302,6 @@ private class NsdResolveListener(
             val socket = Socket(address, port)
             val link =
                 NsdClientPartialIdentityLink(
-                    chainId = connection.chainId,
                     applicationContext = applicationContext,
                     connection = connection,
                     socket = socket,
@@ -319,7 +319,6 @@ private class NsdResolveListener(
 }
 
 private class NsdClientPartialIdentityLink(
-    chainId: ChainId,
     connection: LinkedConnection,
     private val socket: Socket,
     logger: Logger,
@@ -330,7 +329,6 @@ private class NsdClientPartialIdentityLink(
     serviceInfo: ServiceInfo,
 ) :
     NsdPartialIdentityLink(
-        chainId,
         socket = socket,
         connection = connection,
         logger = logger,
@@ -341,10 +339,9 @@ private class NsdClientPartialIdentityLink(
         protocol = Client,
         serviceInfo = serviceInfo,
     ) {
-    override fun createFullIdentityLink(socket: ReaderWriterCloser): Result<Link, FailureReason> {
+    override fun createFullIdentityLink(socket: ReaderWriterCloser): Result<FullIdentityLink, FailureReason> {
         return Ok(
             NsdClientFullIdentityLink(
-                chainId = chainId,
                 connection = connection,
                 socket = socket,
                 logger = logger,
@@ -360,7 +357,6 @@ private class NsdClientPartialIdentityLink(
 }
 
 private class NsdClientFullIdentityLink(
-    chainId: ChainId,
     connection: LinkedConnection,
     socket: ReaderWriterCloser,
     logger: Logger,
@@ -368,7 +364,6 @@ private class NsdClientFullIdentityLink(
     currentFullIdentity: FullIdentity,
 ) :
     IOFullIdentityLink(
-        chainId = chainId,
         connection = connection,
         socket = socket,
         logger = logger,
@@ -379,7 +374,6 @@ private class NsdClientFullIdentityLink(
     override fun createConnectedLink(): Result<ConnectedLink, FailureReason> {
         return Ok(
             NsdClientConnectedLink(
-                chainId = chainId,
                 socket = socket,
                 connection = connection,
                 logger = logger,
@@ -395,7 +389,6 @@ private class NsdClientFullIdentityLink(
 }
 
 private class NsdClientConnectedLink(
-    chainId: ChainId,
     private val socket: ReaderWriterCloser,
     connection: LinkedConnection,
     logger: Logger,
@@ -403,7 +396,6 @@ private class NsdClientConnectedLink(
     currentFullIdentity: FullIdentity,
 ) :
     IOConnectedLink(
-        chainId = chainId,
         socket = socket,
         connection = connection,
         logger = logger,

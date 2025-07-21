@@ -7,6 +7,10 @@ class RetrySignalConf {
     private val mutableFlow = MutableStateFlow(Retry.READY)
     internal val flow = mutableFlow.asStateFlow()
 
+    fun setPreference(retry: Retry) {
+        mutableFlow.value = retry
+    }
+
     enum class Retry {
         READY,
         BACKOFF,

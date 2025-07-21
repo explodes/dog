@@ -10,6 +10,7 @@ import io.explod.dog.common.RetrySignalConf
 import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState
+import io.explod.dog.conn.FullIdentityLink
 import io.explod.dog.conn.Link
 import io.explod.dog.conn.LinkListener
 import io.explod.dog.conn.LinkedConnection
@@ -232,7 +233,6 @@ private class NsdServerServiceLogic(
                         FullIdentity(partialIdentity = partialIdentity, appBytes = null)
                     val link =
                         NsdServerPartialIdentityLink(
-                            chainId = connection.chainId,
                             connection = connection,
                             socket = socket,
                             serviceInfo = serviceInfo,
@@ -292,7 +292,6 @@ private sealed class RegistrationResult {
 }
 
 private class NsdServerPartialIdentityLink(
-    override val chainId: ChainId,
     connection: LinkedConnection,
     private val socket: Socket,
     serviceInfo: ServiceInfo,
@@ -303,7 +302,6 @@ private class NsdServerPartialIdentityLink(
     applicationContext: Context,
 ) :
     NsdPartialIdentityLink(
-        chainId = chainId,
         connection = connection,
         serviceInfo = serviceInfo,
         logger = logger,
@@ -315,10 +313,9 @@ private class NsdServerPartialIdentityLink(
         socket = socket,
     ) {
 
-    override fun createFullIdentityLink(socket: ReaderWriterCloser): Result<Link, FailureReason> {
+    override fun createFullIdentityLink(socket: ReaderWriterCloser): Result<FullIdentityLink, FailureReason> {
         return Ok(
             NsdServerFullIdentityLink(
-                chainId = chainId,
                 socket = socket,
                 connection = connection,
                 logger = logger,
@@ -334,7 +331,6 @@ private class NsdServerPartialIdentityLink(
 }
 
 private class NsdServerFullIdentityLink(
-    chainId: ChainId,
     socket: ReaderWriterCloser,
     connection: LinkedConnection,
     logger: Logger,
@@ -342,7 +338,6 @@ private class NsdServerFullIdentityLink(
     currentFullIdentity: FullIdentity,
 ) :
     IOFullIdentityLink(
-        chainId = chainId,
         connection = connection,
         socket = socket,
         logger = logger,
@@ -353,7 +348,6 @@ private class NsdServerFullIdentityLink(
     override fun createConnectedLink(): Result<ConnectedLink, FailureReason> {
         return Ok(
             NsdServerConnectedLink(
-                chainId = chainId,
                 socket = socket,
                 connection = connection,
                 logger = logger,
@@ -369,7 +363,6 @@ private class NsdServerFullIdentityLink(
 }
 
 private class NsdServerConnectedLink(
-    chainId: ChainId,
     private val socket: ReaderWriterCloser,
     connection: LinkedConnection,
     logger: Logger,
@@ -377,7 +370,6 @@ private class NsdServerConnectedLink(
     currentFullIdentity: FullIdentity,
 ) :
     IOConnectedLink(
-        chainId = chainId,
         socket = socket,
         connection = connection,
         logger = logger,

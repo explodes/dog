@@ -21,6 +21,7 @@ import io.explod.dog.common.RetrySignalConf
 import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState
+import io.explod.dog.conn.FullIdentityLink
 import io.explod.dog.conn.Link
 import io.explod.dog.conn.LinkListener
 import io.explod.dog.conn.LinkedConnection
@@ -327,7 +328,6 @@ private class RfcommClientServiceLogic(
             val fullIdentity = FullIdentity(partialIdentity = partialIdentity, appBytes = null)
             val link =
                 RfcommClientPartialIdentityLink(
-                    chainId = connection.chainId,
                     applicationContext = applicationContext,
                     connection = connection,
                     socket = socket,
@@ -375,7 +375,6 @@ private sealed class StartResult {
 }
 
 private class RfcommClientPartialIdentityLink(
-    override val chainId: ChainId,
     connection: LinkedConnection,
     private val socket: BluetoothSocket,
     private val device: BluetoothDevice,
@@ -387,7 +386,6 @@ private class RfcommClientPartialIdentityLink(
     serviceInfo: ServiceInfo,
 ) :
     RfcommPartialIdentityLink(
-        chainId = chainId,
         device = device,
         connection = connection,
         logger = logger,
@@ -402,10 +400,9 @@ private class RfcommClientPartialIdentityLink(
         return createSocket(socket)
     }
 
-    override fun createFullIdentityLink(socket: ReaderWriterCloser): Result<Link, FailureReason> {
+    override fun createFullIdentityLink(socket: ReaderWriterCloser): Result<FullIdentityLink, FailureReason> {
         return Ok(
             RfcommClientFullIdentityLink(
-                chainId = chainId,
                 connection = connection,
                 socket = socket,
                 device = device,
@@ -422,7 +419,6 @@ private class RfcommClientPartialIdentityLink(
 }
 
 private class RfcommClientFullIdentityLink(
-    chainId: ChainId,
     connection: LinkedConnection,
     socket: ReaderWriterCloser,
     private val device: BluetoothDevice,
@@ -431,7 +427,6 @@ private class RfcommClientFullIdentityLink(
     currentFullIdentity: FullIdentity,
 ) :
     IOFullIdentityLink(
-        chainId = chainId,
         connection = connection,
         socket = socket,
         logger = logger,
@@ -442,7 +437,6 @@ private class RfcommClientFullIdentityLink(
     override fun createConnectedLink(): Result<ConnectedLink, FailureReason> {
         return Ok(
             RfcommClientConnectedLink(
-                chainId = chainId,
                 connection = connection,
                 socket = socket,
                 device = device,
@@ -459,7 +453,6 @@ private class RfcommClientFullIdentityLink(
 }
 
 private class RfcommClientConnectedLink(
-    chainId: ChainId,
     socket: ReaderWriterCloser,
     private val device: BluetoothDevice,
     connection: LinkedConnection,
@@ -468,7 +461,6 @@ private class RfcommClientConnectedLink(
     currentFullIdentity: FullIdentity,
 ) :
     IOConnectedLink(
-        chainId = chainId,
         socket = socket,
         connection = connection,
         logger = logger,

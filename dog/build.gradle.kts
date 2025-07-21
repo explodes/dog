@@ -6,11 +6,7 @@ plugins {
 
 publishing {
     publications {
-        register<MavenPublication>("release") {
-            afterEvaluate {
-                from(components["release"])
-            }
-        }
+        register<MavenPublication>("release") { afterEvaluate { from(components["release"]) } }
     }
 }
 
@@ -19,19 +15,16 @@ android {
     compileSdk = 36
     defaultConfig {
         minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-    publishing {
-        singleVariant("release") {}
-    }
+    publishing { singleVariant("release") {} }
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -39,9 +32,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+    kotlinOptions { jvmTarget = "11" }
 }
 
 dependencies {
@@ -49,10 +40,19 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
 
+    testImplementation(libs.androidx.test)
+    testImplementation(libs.androidx.junit)
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.junit.runner)
+    testImplementation(libs.google.truth)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
 
+    androidTestImplementation(libs.androidx.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.google.truth)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.robolectric)
 }
