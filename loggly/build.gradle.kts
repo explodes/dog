@@ -1,19 +1,30 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    `maven-publish`
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
 
 android {
     namespace = "io.explod.loggly"
     compileSdk = 36
-
     defaultConfig {
         minSdk = 26
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-
+    publishing {
+        singleVariant("release") {}
+    }
     buildTypes {
         release {
             isMinifyEnabled = false

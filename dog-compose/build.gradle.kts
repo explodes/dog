@@ -2,19 +2,31 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    `maven-publish`
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
 
 android {
     namespace = "io.explod.dog_compose"
     compileSdk = 36
-
     defaultConfig {
         minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
-
+    publishing {
+        singleVariant("release") {}
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,6 +50,7 @@ android {
         compose = true
     }
 }
+
 
 dependencies {
     implementation(project(":dog"))
