@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dog_tag_bond">#ff3c227f</color>
+    <color name="dog_tag_admit">#ff3c227f</color>
+    <color name="dog_tag_join">#ff3c227f</color>
+    <color name="dog_tag_error">#ff7f223c</color>
+    <color name="dog_tag_rejected">#ff7f223c</color>
+    <color name="dog_tag_disconnected">#FF303030</color>
+    <color name="dog_tag_connecting">#FF727272</color>
+    <color name="dog_tag_connected">#FF027f02</color>
+    <color name="dog_device_circle">#FFD0BCFF</color>
+</resources>

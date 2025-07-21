@@ -1,0 +1,14 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/searching_1"
+        android:duration="225" />
+    <item
+        android:drawable="@drawable/searching_2"
+        android:duration="225" />
+    <item
+        android:drawable="@drawable/searching_3"
+        android:duration="225" />
+    <item
+        android:drawable="@drawable/searching_4"
+        android:duration="225" />
+</animation-list>

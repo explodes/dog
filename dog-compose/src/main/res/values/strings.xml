@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="dog_searching">Searching…</string>
+    <string name="dog_perform_bond">Bond</string>
+    <string name="dog_perform_admit">Admit</string>
+    <string name="dog_perform_join">Join</string>
+    <string name="dog_state_connecting">Waiting…</string>
+    <string name="dog_state_connected">Connected</string>
+    <string name="dog_state_error">Error</string>
+    <string name="dog_state_disconnected">Disconnected</string>
+    <string name="dog_state_rejected">Rejected</string>
+    <string name="dog_cancel_search">Cancel</string>
+    <string name="dog_waiting_for_devices">Waiting for devices…</string>
+    <plurals name="dog_select_devices">
+        <item quantity="zero">Waiting…</item>
+        <item quantity="one">Select device</item>
+        <item quantity="other">Select devices</item>
+    </plurals>
+    <string name="dog_connecting_1">Connecting.</string>
+    <string name="dog_connecting_2">Connecting..</string>
+    <string name="dog_connecting_3" tools:ignore="TypographyEllipsis">Connecting...</string>
+</resources>
