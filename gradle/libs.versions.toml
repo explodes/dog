@@ -14,6 +14,7 @@ coro = "1.10.2"
 hilt = "2.56.2"
 ksp = "2.2.0-2.0.2"
 viewmodel = "2.9.1"
+dog = "main-SNAPSHOT"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +39,9 @@ material = { group = "com.google.android.material", name = "material", version.r
 coro = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coro" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+dog = { group = "com.github.explodes.dog", name = "dog", version.ref = "dog" }
+dog-compose = { group = "com.github.explodes.dog", name = "dog-compose", version.ref = "dog" }
+dog-loggly = { group = "com.github.explodes.dog", name = "loggly", version.ref = "dog" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
