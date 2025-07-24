@@ -57,9 +57,9 @@ separate dependencies.
 
 ### Dog
 
-The `dog` module itself includes a pattern that allows for returning control back to the user while
-discovery or establishing a connection. This enables user interaction between any step, vital or
-not, such as:
+The `dog` module itself includes a pattern that allows for returning control back to the user during
+discovery or while connecting. This enables user interaction between any step, vital or not, such
+as:
 
 - Finding a client or server
 - Prompting to begin Bluetooth pairing
