@@ -10,7 +10,7 @@ A device-connection-finding library for Android.
 | dog-compose | `"com.github.explodes.dog:dog-compose:0.0.2"` | [![Dog Compose Release](https://jitpack.io/v/com.github.explodes.dog/dog-compose.svg?style=flat-square)](https://jitpack.io/#com.github.explodes.dog/dog-compose) |  
 | loggly      | `"com.github.explodes.dog:loggly:0.0.2"`      | [![Loggly Release](https://jitpack.io/v/com.github.explodes.dog/loggly.svg?style=flat-square)](https://jitpack.io/#com.github.explodes.dog/loggly)                |  
 
-Dog is a library built to answer two questions:
+Dog is a project aimed to answer two questions:
 
 - What does it look like when we do everything we can to find a nearby device?
 - Can we make it easy for an app developer to "just get some devices"!? so they can create amazing
