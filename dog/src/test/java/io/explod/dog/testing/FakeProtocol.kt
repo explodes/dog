@@ -2,7 +2,7 @@ package io.explod.dog.testing
 
 import io.explod.dog.conn.Connection
 import io.explod.dog.protocol.DedupNonce
-import io.explod.dog.protocol.FullIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol
 import io.explod.dog.protocol.Protocol.Join.ACCEPT
 import io.explod.dog.util.FailureReason
@@ -14,15 +14,15 @@ import java.io.OutputStream
 import kotlin.random.Random
 
 class FakeProtocol(
-     val remoteIdentity: FullIdentity,
+     val remoteIdentity: Identity,
      val remoteDedupNonce: DedupNonce = DedupNonce(Random.nextLong()),
 ) : Protocol {
 
     override fun identify(
         inputStream: InputStream,
         outputStream: OutputStream,
-        fullIdentity: FullIdentity,
-    ): Result<FullIdentity, FailureReason> {
+        localIdentity: Identity,
+    ): Result<Identity, FailureReason> {
         return Ok(remoteIdentity)
     }
 

@@ -1,8 +1,7 @@
 package io.explod.dog.conn
 
 import androidx.annotation.CheckResult
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol.Join
 import io.explod.dog.util.FailureReason
 import io.explod.dog.util.Ok
@@ -13,16 +12,8 @@ sealed class Link {
     /** An identifier shared with each Link that this Link advances to. */
     abstract val chainId: ChainId
 
-    /**
-     * Get the custom limited identity of the remote device that was made available during
-     * connection setup.
-     */
-    abstract fun getPartialIdentity(): PartialIdentity
-
-    /**
-     * Get the custom identity of the remote device that was made available during connection setup.
-     */
-    abstract fun getFullIdentity(): FullIdentity
+    /** Get the currently available identity of the remote device. */
+    abstract fun getIdentity(): Identity
 
     /** Permanently close this link. No effect if the link is already closed. */
     internal abstract suspend fun close()

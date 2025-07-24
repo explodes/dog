@@ -4,8 +4,7 @@ import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.Connection
 import io.explod.dog.conn.ConnectionState
 import io.explod.dog.protocol.DeviceType
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 
 data class ConnectionInformation(
     val chainId: ChainId,
@@ -15,19 +14,13 @@ data class ConnectionInformation(
     val advance: Advance?,
 ) {
     val deviceType: DeviceType?
-        get() =
-            snapshot.fullIdentity?.partialIdentity?.deviceType
-                ?: snapshot.partialIdentity?.deviceType
+        get() = snapshot.identity?.deviceType
 
     val connectionState: ConnectionState
         get() = snapshot.connectionState
 }
 
-data class Snapshot(
-    val connectionState: ConnectionState,
-    val partialIdentity: PartialIdentity?,
-    val fullIdentity: FullIdentity?,
-)
+data class Snapshot(val connectionState: ConnectionState, val identity: Identity?)
 
 data class Advance(
     val advanceReason: AdvanceReason,

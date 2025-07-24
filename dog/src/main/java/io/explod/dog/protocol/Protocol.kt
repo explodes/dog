@@ -38,8 +38,8 @@ interface Protocol {
     fun identify(
         inputStream: InputStream,
         outputStream: OutputStream,
-        fullIdentity: FullIdentity,
-    ): Result<FullIdentity, FailureReason>
+        localIdentity: Identity,
+    ): Result<Identity, FailureReason>
 
     @Throws(IOException::class)
     fun join(
@@ -60,8 +60,8 @@ interface Protocol {
         override fun identify(
             inputStream: InputStream,
             outputStream: OutputStream,
-            fullIdentity: FullIdentity,
-        ): Result<FullIdentity, FailureReason> {
+            localIdentity: Identity,
+        ): Result<Identity, FailureReason> {
             // Hello. Client writes first.
             outputStream.write(MessageType.HELLO)
             if (inputStream.read() != MessageType.HELLO) {
@@ -69,7 +69,7 @@ interface Protocol {
             }
 
             // Identity. Client writes first.
-            IO.IdentitySharing.writeIdentities(outputStream, fullIdentity)
+            IO.IdentitySharing.writeIdentities(outputStream, localIdentity)
             val result = IO.IdentitySharing.readIdentities(inputStream)
             return result
         }
@@ -145,8 +145,8 @@ interface Protocol {
         override fun identify(
             inputStream: InputStream,
             outputStream: OutputStream,
-            fullIdentity: FullIdentity,
-        ): Result<FullIdentity, FailureReason> {
+            localIdentity: Identity,
+        ): Result<Identity, FailureReason> {
             // Hello. Client writes first.
             if (inputStream.read() != MessageType.HELLO) {
                 return Err(FailureReason("Invalid hello message."))
@@ -155,7 +155,7 @@ interface Protocol {
 
             // Identity. Client writes first.
             val result = IO.IdentitySharing.readIdentities(inputStream)
-            IO.IdentitySharing.writeIdentities(outputStream, fullIdentity)
+            IO.IdentitySharing.writeIdentities(outputStream, localIdentity)
             return result
         }
 
@@ -235,55 +235,32 @@ interface Protocol {
         object IdentitySharing {
 
             @Throws(IOException::class)
-            fun readIdentities(inputStream: InputStream): Result<FullIdentity, FailureReason> {
+            fun readIdentities(inputStream: InputStream): Result<Identity, FailureReason> {
                 // Read full identity.
                 if (inputStream.read() != MessageType.FULL_IDENTITY) {
                     return Err(FailureReason("Invalid full identity message response."))
                 }
-                val fullIdentity = readFullIdentity(inputStream)
-                return Ok(fullIdentity)
-            }
-
-            @Throws(IOException::class)
-            private fun readPartialIdentity(inputStream: InputStream): PartialIdentity {
                 val connectionType = ConnectionType.fromByte(inputStream.read().toByte())
                 val deviceType = DeviceType.fromByte(inputStream.read().toByte())
                 val name = inputStream.readVarintLengthAndArray()?.let { String(it) }
-                return PartialIdentity(
-                    name = name,
-                    deviceType = deviceType,
-                    connectionType = connectionType,
-                )
-            }
-
-            @Throws(IOException::class)
-            private fun readFullIdentity(inputStream: InputStream): FullIdentity {
-                val partialIdentity = readPartialIdentity(inputStream)
                 val appBytes =
                     inputStream.readVarintLengthAndArray()?.let { ImmutableBytes.create(it) }
-                return FullIdentity(partialIdentity = partialIdentity, appBytes = appBytes)
+                val identity = Identity(
+                    name = name,
+                    connectionType = connectionType,
+                    deviceType = deviceType,
+                    appBytes = appBytes,
+                )
+                return Ok(identity)
             }
 
             @Throws(IOException::class)
-            fun writeIdentities(outputStream: OutputStream, fullIdentity: FullIdentity) {
+            fun writeIdentities(outputStream: OutputStream, localIdentity: Identity) {
                 outputStream.write(MessageType.FULL_IDENTITY)
-                writeFullIdentity(outputStream, fullIdentity)
-            }
-
-            @Throws(IOException::class)
-            private fun writePartialIdentity(
-                outputStream: OutputStream,
-                identity: PartialIdentity,
-            ) {
-                outputStream.write(identity.connectionType?.byte?.toInt() ?: 0)
-                outputStream.write(identity.deviceType?.byte?.toInt() ?: 0)
-                outputStream.writeVarintLengthAndArray(identity.name?.toByteArray())
-            }
-
-            @Throws(IOException::class)
-            private fun writeFullIdentity(outputStream: OutputStream, identity: FullIdentity) {
-                writePartialIdentity(outputStream, identity.partialIdentity)
-                outputStream.writeVarintLengthAndArray(identity.appBytes?.bytes())
+                outputStream.write(localIdentity.connectionType?.byte?.toInt() ?: 0)
+                outputStream.write(localIdentity.deviceType?.byte?.toInt() ?: 0)
+                outputStream.writeVarintLengthAndArray(localIdentity.name?.toByteArray())
+                outputStream.writeVarintLengthAndArray(localIdentity.appBytes?.bytes())
             }
         }
 

@@ -9,39 +9,23 @@ import android.telephony.TelephonyManager
 import io.explod.dog.util.ImmutableBytes
 import java.util.Locale
 
-data class PartialIdentity(
+data class Identity(
     val name: String?,
     val deviceType: DeviceType?,
     val connectionType: ConnectionType?,
+    val appBytes: ImmutableBytes?,
 )
 
-data class FullIdentity(val partialIdentity: PartialIdentity, val appBytes: ImmutableBytes?)
-
-fun createFullIdentity(
+fun createIdentity(
     applicationContext: Context,
     userInfo: UserInfo,
     connectionType: ConnectionType,
-): FullIdentity {
-    return FullIdentity(
-        partialIdentity =
-            createPartialIdentity(
-                applicationContext = applicationContext,
-                userInfo = userInfo,
-                connectionType = connectionType,
-            ),
-        appBytes = userInfo.appBytes,
-    )
-}
-
-fun createPartialIdentity(
-    applicationContext: Context,
-    userInfo: UserInfo,
-    connectionType: ConnectionType,
-): PartialIdentity {
-    return PartialIdentity(
+): Identity {
+    return Identity(
         name = userInfo.userName ?: getDeviceName(applicationContext),
         deviceType = getDeviceUiMode(applicationContext),
         connectionType = connectionType,
+        appBytes = userInfo.appBytes,
     )
 }
 

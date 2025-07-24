@@ -1,8 +1,7 @@
 package io.explod.dog.conn
 
 import androidx.annotation.CheckResult
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.util.FailureReason
 import io.explod.dog.util.Ok
 import io.explod.dog.util.Result
@@ -39,12 +38,8 @@ internal class LinkedConnectionImpl(override val chainId: ChainId, private val l
             .flatOk { _ -> checkClosed() } // Recheck check after waiting.
     }
 
-    override fun getPartialIdentity(): PartialIdentity? {
-        return linkState.locked { it.activeLink }?.getPartialIdentity()
-    }
-
-    override fun getFullIdentity(): FullIdentity? {
-        return linkState.locked { it.activeLink }?.getFullIdentity()
+    override fun getIdentity(): Identity? {
+        return linkState.locked { it.activeLink }?.getIdentity()
     }
 
     override fun setLink(link: Link, connectionState: ConnectionState) {

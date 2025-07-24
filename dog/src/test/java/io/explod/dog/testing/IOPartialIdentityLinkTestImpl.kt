@@ -5,8 +5,7 @@ import io.explod.dog.common.IOPartialIdentityLink
 import io.explod.dog.conn.FullIdentityLink
 import io.explod.dog.conn.Link
 import io.explod.dog.conn.LinkedConnection
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol
 import io.explod.dog.protocol.UserInfo
 import io.explod.dog.util.FailureReason
@@ -20,8 +19,7 @@ class IOPartialIdentityLinkTestImpl(
     applicationContext: Context,
     connection: LinkedConnection,
     logger: Logger,
-    currentPartialIdentity: PartialIdentity,
-    currentFullIdentity: FullIdentity,
+    currentRemoteIdentity: Identity,
     protocol: Protocol,
     userInfo: UserInfo,
     private val socket: ReaderWriterCloser,
@@ -31,8 +29,7 @@ class IOPartialIdentityLinkTestImpl(
         applicationContext = applicationContext,
         connection = connection,
         logger = logger,
-        currentPartialIdentity = currentPartialIdentity,
-        currentFullIdentity = currentFullIdentity,
+        currentRemoteIdentity = currentRemoteIdentity,
         protocol = protocol,
         userInfo = userInfo,
     ) {
@@ -59,8 +56,7 @@ class IOPartialIdentityLinkTestImpl(
         private val applicationContext: Context,
         private val connection: LinkedConnection,
         private val logger: Logger,
-        private val currentPartialIdentity: PartialIdentity,
-        private val currentFullIdentity: FullIdentity,
+        private val currentRemoteIdentity: Identity,
         private val userInfo: UserInfo,
         private val socket: ReaderWriterCloser,
         private val protocol: Protocol,
@@ -70,8 +66,7 @@ class IOPartialIdentityLinkTestImpl(
                 applicationContext = applicationContext,
                 connection = connection,
                 logger = logger,
-                currentPartialIdentity = currentPartialIdentity,
-                currentFullIdentity = currentFullIdentity,
+                currentRemoteIdentity = currentRemoteIdentity,
                 protocol = protocol,
                 userInfo = userInfo,
                 socket = socket,

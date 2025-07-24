@@ -13,11 +13,9 @@ import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
 import io.explod.dog.common.IOPartialIdentityLink
-import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.Link
 import io.explod.dog.conn.LinkedConnection
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol
 import io.explod.dog.protocol.ServiceInfo
 import io.explod.dog.protocol.UserInfo
@@ -72,8 +70,7 @@ abstract class RfcommPartialIdentityLink(
     connection: LinkedConnection,
     private val device: BluetoothDevice,
     logger: Logger,
-    currentPartialIdentity: PartialIdentity,
-    currentFullIdentity: FullIdentity,
+    currentRemoteIdentity: Identity,
     applicationContext: Context,
     userInfo: UserInfo,
     protocol: Protocol,
@@ -82,8 +79,7 @@ abstract class RfcommPartialIdentityLink(
     IOPartialIdentityLink(
         connection = connection,
         logger = logger,
-        currentPartialIdentity = currentPartialIdentity,
-        currentFullIdentity = currentFullIdentity,
+        currentRemoteIdentity = currentRemoteIdentity,
         applicationContext = applicationContext,
         userInfo = userInfo,
         protocol = protocol,
@@ -107,9 +103,8 @@ abstract class RfcommPartialIdentityLink(
             }
 
             override fun toString(): String {
-                val fullIdentity = getFullIdentity()
-                val partialIdentity = getPartialIdentity()
-                val name = fullIdentity.partialIdentity.name ?: partialIdentity.name
+                val currentRemoteIdentity = getIdentity()
+                val name = currentRemoteIdentity.name
                 return if (name != null) {
                     "Socket(rfcomm=${serviceInfo.systemName},$name,${device.address})"
                 } else {

@@ -25,9 +25,7 @@ internal data class Versioned<T>(val version: Long, val value: T) {
 }
 
 internal class NullConnection() : Connection {
-    override fun getPartialIdentity() = null
-
-    override fun getFullIdentity() = null
+    override fun getIdentity() = null
 
     override suspend fun send(bytes: ByteArray): Result<Ok, FailureReason> = Ok(Ok)
 

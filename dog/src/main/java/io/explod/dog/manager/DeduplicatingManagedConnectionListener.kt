@@ -138,8 +138,8 @@ internal class DeduplicatingManagedConnectionListener(
         currentLink: ConnectedLink,
         newLink: ConnectedLink,
     ): Boolean {
-        val currentType = currentLink.getFullIdentity().partialIdentity.connectionType
-        val newType = newLink.getFullIdentity().partialIdentity.connectionType
+        val currentType = currentLink.getIdentity().connectionType
+        val newType = newLink.getIdentity().connectionType
 
         // If we don't know exactly what we're connecting to,
         // then we stay loyal to our current connection.

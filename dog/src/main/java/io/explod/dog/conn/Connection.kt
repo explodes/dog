@@ -1,9 +1,7 @@
 package io.explod.dog.conn
 
 import androidx.annotation.CheckResult
-import io.explod.dog.protocol.DeviceType
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.util.FailureReason
 import io.explod.dog.util.Ok
 import io.explod.dog.util.Result
@@ -17,10 +15,8 @@ interface Connection : Closeable {
     /** User-friendly name of this connection. */
     val name: String
         get() {
-            val deviceType = fromIdentity<DeviceType?> { deviceType }
-            val connectionType = fromIdentity { connectionType }
-            val name = fromIdentity { name } ?: createName(deviceType, connectionType)
-            return name
+            val identity = getIdentity()
+            return identity?.name ?: createName(identity?.deviceType, identity?.connectionType)
         }
 
     /**
@@ -34,9 +30,6 @@ interface Connection : Closeable {
      */
     @CheckResult suspend fun receive(buffer: ByteArray): Result<Int, FailureReason>
 
-    /** Get the current PartialIdentity information. */
-    fun getPartialIdentity(): PartialIdentity?
-
-    /** Get the current FullIdentity information. */
-    fun getFullIdentity(): FullIdentity?
+    /** Get the current known Identity information. */
+    fun getIdentity(): Identity?
 }

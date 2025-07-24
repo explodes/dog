@@ -2,11 +2,9 @@ package io.explod.dog.nsd
 
 import android.content.Context
 import io.explod.dog.common.IOPartialIdentityLink
-import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.Link
 import io.explod.dog.conn.LinkedConnection
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol
 import io.explod.dog.protocol.ServiceInfo
 import io.explod.dog.protocol.UserInfo
@@ -24,8 +22,7 @@ abstract class NsdPartialIdentityLink(
     connection: LinkedConnection,
     private val socket: Socket,
     logger: Logger,
-    currentPartialIdentity: PartialIdentity,
-    currentFullIdentity: FullIdentity,
+    currentRemoteIdentity: Identity,
     applicationContext: Context,
     userInfo: UserInfo,
     protocol: Protocol,
@@ -34,8 +31,7 @@ abstract class NsdPartialIdentityLink(
     IOPartialIdentityLink(
         connection = connection,
         logger = logger,
-        currentPartialIdentity = currentPartialIdentity,
-        currentFullIdentity = currentFullIdentity,
+        currentRemoteIdentity = currentRemoteIdentity,
         applicationContext = applicationContext,
         userInfo = userInfo,
         protocol = protocol,
@@ -54,9 +50,8 @@ abstract class NsdPartialIdentityLink(
             }
 
             override fun toString(): String {
-                val fullIdentity = getFullIdentity()
-                val partialIdentity = getPartialIdentity()
-                val name = fullIdentity.partialIdentity.name ?: partialIdentity.name
+                val remoteIdentity = getIdentity()
+                val name = remoteIdentity.name
                 val address = "${socket.remoteSocketAddress}:${socket.port}"
                 if (name != null) {
                     return "Socket(nsd=${serviceInfo.nsdServiceType},$name)"

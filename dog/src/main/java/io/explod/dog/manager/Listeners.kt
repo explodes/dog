@@ -105,8 +105,7 @@ internal abstract class Listeners(
         private fun LinkedConnection.getSnapshot(): Snapshot {
             return Snapshot(
                 connectionState = getConnectionState(),
-                partialIdentity = getPartialIdentity(),
-                fullIdentity = getFullIdentity(),
+                identity = getIdentity(),
             )
         }
     }

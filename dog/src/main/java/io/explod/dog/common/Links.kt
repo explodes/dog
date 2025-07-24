@@ -12,11 +12,10 @@ import io.explod.dog.conn.PartialIdentityLink
 import io.explod.dog.conn.closeLink
 import io.explod.dog.conn.handleJoin
 import io.explod.dog.protocol.ConnectionType
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol
 import io.explod.dog.protocol.UserInfo
-import io.explod.dog.protocol.createFullIdentity
+import io.explod.dog.protocol.createIdentity
 import io.explod.dog.util.FailureReason
 import io.explod.dog.util.Ok
 import io.explod.dog.util.ReaderWriterCloser
@@ -33,8 +32,7 @@ abstract class IOPartialIdentityLink(
     protected val applicationContext: Context,
     protected val connection: LinkedConnection,
     protected val logger: Logger,
-    private var currentPartialIdentity: PartialIdentity,
-    private var currentFullIdentity: FullIdentity,
+    private var currentRemoteIdentity: Identity,
     protected val protocol: Protocol,
     protected val userInfo: UserInfo,
 ) : PartialIdentityLink(connection.chainId) {
@@ -60,13 +58,12 @@ abstract class IOPartialIdentityLink(
         try {
             socket = createSocket()
             socketRef.store(socket)
-            val localFullIdentity =
-                createFullIdentity(applicationContext, userInfo, ConnectionType.BLUETOOTH)
+            val localIdentity =
+                createIdentity(applicationContext, userInfo, ConnectionType.BLUETOOTH)
             protocol
-                .identify(socket.inputStream, socket.outputStream, localFullIdentity)
-                .ok { fullIdentity ->
-                    this@IOPartialIdentityLink.currentPartialIdentity = fullIdentity.partialIdentity
-                    this@IOPartialIdentityLink.currentFullIdentity = fullIdentity
+                .identify(socket.inputStream, socket.outputStream, localIdentity)
+                .ok { remoteIdentity ->
+                    this@IOPartialIdentityLink.currentRemoteIdentity = remoteIdentity
                     connection.notifyLinkIdentityChanged(this@IOPartialIdentityLink)
                 }
                 .err {
@@ -90,14 +87,12 @@ abstract class IOPartialIdentityLink(
         }
     }
 
-    abstract fun createFullIdentityLink(socket: ReaderWriterCloser): Result<FullIdentityLink, FailureReason>
+    abstract fun createFullIdentityLink(
+        socket: ReaderWriterCloser
+    ): Result<FullIdentityLink, FailureReason>
 
-    override fun getFullIdentity(): FullIdentity {
-        return currentFullIdentity
-    }
-
-    override fun getPartialIdentity(): PartialIdentity {
-        return currentPartialIdentity
+    override fun getIdentity(): Identity {
+        return currentRemoteIdentity
     }
 
     override suspend fun close() {
@@ -110,8 +105,7 @@ abstract class IOFullIdentityLink(
     protected val connection: LinkedConnection,
     protected val socket: ReaderWriterCloser,
     protected val logger: Logger,
-    private val currentPartialIdentity: PartialIdentity,
-    private val currentFullIdentity: FullIdentity,
+    private val currentRemoteIdentity: Identity,
     protected val protocol: Protocol,
 ) : FullIdentityLink(connection.chainId) {
 
@@ -129,12 +123,8 @@ abstract class IOFullIdentityLink(
 
     abstract fun createConnectedLink(): Result<ConnectedLink, FailureReason>
 
-    override fun getFullIdentity(): FullIdentity {
-        return currentFullIdentity
-    }
-
-    override fun getPartialIdentity(): PartialIdentity {
-        return currentPartialIdentity
+    override fun getIdentity(): Identity {
+        return currentRemoteIdentity
     }
 
     override suspend fun close() {
@@ -147,8 +137,7 @@ abstract class IOConnectedLink(
     protected val connection: LinkedConnection,
     private val socket: ReaderWriterCloser,
     protected val logger: Logger,
-    private val currentPartialIdentity: PartialIdentity,
-    private val currentFullIdentity: FullIdentity,
+    private val currentRemoteIdentity: Identity,
 ) : ConnectedLink(connection.chainId) {
     override suspend fun send(bytes: ByteArray): Result<Ok, FailureReason> {
         try {
@@ -170,12 +159,8 @@ abstract class IOConnectedLink(
         }
     }
 
-    override fun getFullIdentity(): FullIdentity {
-        return currentFullIdentity
-    }
-
-    override fun getPartialIdentity(): PartialIdentity {
-        return currentPartialIdentity
+    override fun getIdentity(): Identity {
+        return currentRemoteIdentity
     }
 
     override suspend fun close() {

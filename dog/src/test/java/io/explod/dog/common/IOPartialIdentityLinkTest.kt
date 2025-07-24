@@ -7,8 +7,7 @@ import io.explod.dog.conn.FullIdentityLink
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.protocol.ConnectionType
 import io.explod.dog.protocol.DeviceType
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.UserInfo
 import io.explod.dog.testing.FakeProtocol
 import io.explod.dog.testing.FakeReaderWriterCloser
@@ -27,7 +26,7 @@ import org.junit.runner.RunWith
 class IOPartialIdentityLinkTest {
     private lateinit var applicationContext: Context
     private lateinit var userInfo: UserInfo
-    private lateinit var currentFullIdentity: FullIdentity
+    private lateinit var currentRemoteIdentity: Identity
     private lateinit var logger: Logger
     private lateinit var connection: LinkedConnection
     private lateinit var socket: ReaderWriterCloser
@@ -38,10 +37,11 @@ class IOPartialIdentityLinkTest {
     fun setUp() {
         applicationContext = ApplicationProvider.getApplicationContext()
         userInfo = UserInfo(userName = null, appBytes = null)
-        currentFullIdentity =
-            FullIdentity(
-                partialIdentity =
-                    PartialIdentity(name = null, deviceType = null, connectionType = null),
+        currentRemoteIdentity =
+            Identity(
+                name = null,
+                deviceType = null,
+                connectionType = null,
                 appBytes = userInfo.appBytes,
             )
         logger = mockk<Logger>(relaxed = true)
@@ -50,13 +50,10 @@ class IOPartialIdentityLinkTest {
         protocol =
             FakeProtocol(
                 remoteIdentity =
-                    FullIdentity(
-                        partialIdentity =
-                            PartialIdentity(
-                                name = "Remote Device",
-                                deviceType = DeviceType.WATCH,
-                                connectionType = ConnectionType.BLUETOOTH,
-                            ),
+                    Identity(
+                        name = "Remote Device",
+                        deviceType = DeviceType.WATCH,
+                        connectionType = ConnectionType.BLUETOOTH,
                         appBytes = ImmutableBytes.create(byteArrayOf(1, 2, 3)),
                     )
             )
@@ -66,8 +63,7 @@ class IOPartialIdentityLinkTest {
                 connection = connection,
                 logger = logger,
                 protocol = protocol,
-                currentPartialIdentity = currentFullIdentity.partialIdentity,
-                currentFullIdentity = currentFullIdentity,
+                currentRemoteIdentity = currentRemoteIdentity,
                 userInfo = userInfo,
                 socket = socket,
             )

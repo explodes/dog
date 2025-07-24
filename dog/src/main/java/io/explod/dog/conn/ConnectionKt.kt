@@ -2,11 +2,6 @@ package io.explod.dog.conn
 
 import io.explod.dog.protocol.ConnectionType
 import io.explod.dog.protocol.DeviceType
-import io.explod.dog.protocol.PartialIdentity
-
-fun <T> Connection.fromIdentity(getter: PartialIdentity.() -> T?): T? {
-    return getFullIdentity()?.partialIdentity?.getter() ?: getPartialIdentity()?.getter()
-}
 
 internal fun createName(deviceType: DeviceType?, connectionType: ConnectionType?): String {
     return when (deviceType) {

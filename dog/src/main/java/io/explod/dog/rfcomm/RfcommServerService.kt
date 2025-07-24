@@ -17,18 +17,15 @@ import io.explod.dog.common.ConnectionPreferenceConf
 import io.explod.dog.common.IOConnectedLink
 import io.explod.dog.common.IOFullIdentityLink
 import io.explod.dog.common.RetrySignalConf
-import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState
 import io.explod.dog.conn.FullIdentityLink
-import io.explod.dog.conn.Link
 import io.explod.dog.conn.LinkListener
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.conn.LinkedConnectionListener
 import io.explod.dog.conn.LinkedConnectionStateListener
 import io.explod.dog.protocol.ConnectionType
-import io.explod.dog.protocol.FullIdentity
-import io.explod.dog.protocol.PartialIdentity
+import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol.Server
 import io.explod.dog.protocol.ServiceInfo
 import io.explod.dog.protocol.UserInfo
@@ -288,21 +285,20 @@ private class RfcommServerScanCallback(
             )
         linkedConnectionListener?.onConnection(connection)
 
-        val partialIdentity =
-            PartialIdentity(
+        val currentRemoteIdentity =
+            Identity(
                 name = if (device.name.isNullOrBlank()) null else device.deviceString,
                 deviceType = null,
                 connectionType = ConnectionType.BLUETOOTH,
+                appBytes = null,
             )
-        val fullIdentity = FullIdentity(partialIdentity = partialIdentity, appBytes = null)
         connection.setLink(
             RfcommServerPartialIdentityLink(
                 connection = connection,
                 device = device,
                 serviceInfo = serviceInfo,
                 logger = logger,
-                currentPartialIdentity = partialIdentity,
-                currentFullIdentity = fullIdentity,
+                currentRemoteIdentity = currentRemoteIdentity,
                 applicationContext = applicationContext,
                 userInfo = userInfo,
             ),
@@ -315,8 +311,7 @@ private class RfcommServerPartialIdentityLink(
     connection: LinkedConnection,
     private val device: BluetoothDevice,
     logger: Logger,
-    currentPartialIdentity: PartialIdentity,
-    currentFullIdentity: FullIdentity,
+    currentRemoteIdentity: Identity,
     userInfo: UserInfo,
     applicationContext: Context,
     private val serviceInfo: ServiceInfo,
@@ -325,8 +320,7 @@ private class RfcommServerPartialIdentityLink(
         device = device,
         connection = connection,
         logger = logger,
-        currentPartialIdentity = currentPartialIdentity,
-        currentFullIdentity = currentFullIdentity,
+        currentRemoteIdentity = currentRemoteIdentity,
         applicationContext = applicationContext,
         userInfo = userInfo,
         protocol = Server,
@@ -338,15 +332,16 @@ private class RfcommServerPartialIdentityLink(
         return createSocket(socket)
     }
 
-    override fun createFullIdentityLink(socket: ReaderWriterCloser): Result<FullIdentityLink, FailureReason> {
+    override fun createFullIdentityLink(
+        socket: ReaderWriterCloser
+    ): Result<FullIdentityLink, FailureReason> {
         return Ok(
             RfcommServerFullIdentityLink(
                 socket = socket,
                 device = device,
                 connection = connection,
                 logger = logger,
-                currentPartialIdentity = getPartialIdentity(),
-                currentFullIdentity = getFullIdentity(),
+                currentRemoteIdentity = getIdentity(),
             )
         )
     }
@@ -361,15 +356,13 @@ private class RfcommServerFullIdentityLink(
     private val device: BluetoothDevice,
     connection: LinkedConnection,
     logger: Logger,
-    currentPartialIdentity: PartialIdentity,
-    currentFullIdentity: FullIdentity,
+    currentRemoteIdentity: Identity,
 ) :
     IOFullIdentityLink(
         connection = connection,
         socket = socket,
         logger = logger,
-        currentPartialIdentity = currentPartialIdentity,
-        currentFullIdentity = currentFullIdentity,
+        currentRemoteIdentity = currentRemoteIdentity,
         protocol = Server,
     ) {
     override fun createConnectedLink(): Result<ConnectedLink, FailureReason> {
@@ -379,8 +372,7 @@ private class RfcommServerFullIdentityLink(
                 device = device,
                 connection = connection,
                 logger = logger,
-                currentPartialIdentity = getPartialIdentity(),
-                currentFullIdentity = getFullIdentity(),
+                currentRemoteIdentity = getIdentity(),
             )
         )
     }
@@ -395,15 +387,13 @@ private class RfcommServerConnectedLink(
     private val device: BluetoothDevice,
     connection: LinkedConnection,
     logger: Logger,
-    currentPartialIdentity: PartialIdentity,
-    currentFullIdentity: FullIdentity,
+    currentRemoteIdentity: Identity,
 ) :
     IOConnectedLink(
         socket = socket,
         connection = connection,
         logger = logger,
-        currentPartialIdentity = currentPartialIdentity,
-        currentFullIdentity = currentFullIdentity,
+        currentRemoteIdentity = currentRemoteIdentity,
     ) {
     override fun toString(): String {
         return "RfcommServerConnectedLink(device='${device.deviceString}')"
