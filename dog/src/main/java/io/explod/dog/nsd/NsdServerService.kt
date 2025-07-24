@@ -4,12 +4,8 @@ import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import io.explod.dog.common.ConnectionPreferenceConf
-import io.explod.dog.common.IOConnectedLink
-import io.explod.dog.common.IOFullIdentityLink
 import io.explod.dog.common.RetrySignalConf
-import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState
-import io.explod.dog.conn.FullIdentityLink
 import io.explod.dog.conn.LinkListener
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.conn.LinkedConnectionListener
@@ -23,11 +19,7 @@ import io.explod.dog.protocol.nsdServiceName
 import io.explod.dog.protocol.nsdServiceType
 import io.explod.dog.util.ConfService
 import io.explod.dog.util.CoroutinePackage
-import io.explod.dog.util.FailureReason
 import io.explod.dog.util.Provider
-import io.explod.dog.util.ReaderWriterCloser
-import io.explod.dog.util.Result
-import io.explod.dog.util.Result.Companion.Ok
 import io.explod.dog.util.locked
 import io.explod.loggly.Logger
 import kotlinx.coroutines.CompletableDeferred
@@ -228,7 +220,7 @@ private class NsdServerServiceLogic(
                             appBytes = null,
                         )
                     val link =
-                        NsdServerPartialIdentityLink(
+                        NsdServerUnidentifiedLink(
                             connection = connection,
                             socket = socket,
                             serviceInfo = serviceInfo,
@@ -286,16 +278,16 @@ private sealed class RegistrationResult {
     data class Failure(val errorCode: Int) : RegistrationResult()
 }
 
-private class NsdServerPartialIdentityLink(
+private class NsdServerUnidentifiedLink(
     connection: LinkedConnection,
-    private val socket: Socket,
+    socket: Socket,
     serviceInfo: ServiceInfo,
     logger: Logger,
     currentRemoteIdentity: Identity,
     userInfo: UserInfo,
     applicationContext: Context,
 ) :
-    NsdPartialIdentityLink(
+    NsdUnidentifiedLink(
         connection = connection,
         serviceInfo = serviceInfo,
         logger = logger,
@@ -304,68 +296,4 @@ private class NsdServerPartialIdentityLink(
         protocol = Server,
         applicationContext = applicationContext,
         socket = socket,
-    ) {
-
-    override fun createFullIdentityLink(
-        socket: ReaderWriterCloser
-    ): Result<FullIdentityLink, FailureReason> {
-        return Ok(
-            NsdServerFullIdentityLink(
-                socket = socket,
-                connection = connection,
-                logger = logger,
-                currentRemoteIdentity = getIdentity(),
-            )
-        )
-    }
-
-    override fun toString(): String {
-        return "NsdServerPartialIdentityLink(device='$socket')"
-    }
-}
-
-private class NsdServerFullIdentityLink(
-    socket: ReaderWriterCloser,
-    connection: LinkedConnection,
-    logger: Logger,
-    currentRemoteIdentity: Identity,
-) :
-    IOFullIdentityLink(
-        connection = connection,
-        socket = socket,
-        logger = logger,
-        currentRemoteIdentity = currentRemoteIdentity,
-        protocol = Server,
-    ) {
-    override fun createConnectedLink(): Result<ConnectedLink, FailureReason> {
-        return Ok(
-            NsdServerConnectedLink(
-                socket = socket,
-                connection = connection,
-                logger = logger,
-                currentRemoteIdentity = getIdentity(),
-            )
-        )
-    }
-
-    override fun toString(): String {
-        return "NsdServerFullIdentityLink(device='$socket')"
-    }
-}
-
-private class NsdServerConnectedLink(
-    private val socket: ReaderWriterCloser,
-    connection: LinkedConnection,
-    logger: Logger,
-    currentRemoteIdentity: Identity,
-) :
-    IOConnectedLink(
-        socket = socket,
-        connection = connection,
-        logger = logger,
-        currentRemoteIdentity = currentRemoteIdentity,
-    ) {
-    override fun toString(): String {
-        return "NsdServerConnectedLink(device='$socket')"
-    }
-}
+    )

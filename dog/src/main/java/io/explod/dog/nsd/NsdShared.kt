@@ -1,8 +1,8 @@
 package io.explod.dog.nsd
 
 import android.content.Context
-import io.explod.dog.common.IOPartialIdentityLink
-import io.explod.dog.conn.Link
+import io.explod.dog.common.RwcUnidentifiedLink
+import io.explod.dog.conn.IdentifiedLink
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol
@@ -18,7 +18,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.net.Socket
 
-abstract class NsdPartialIdentityLink(
+abstract class NsdUnidentifiedLink(
     connection: LinkedConnection,
     private val socket: Socket,
     logger: Logger,
@@ -28,7 +28,7 @@ abstract class NsdPartialIdentityLink(
     protocol: Protocol,
     private val serviceInfo: ServiceInfo,
 ) :
-    IOPartialIdentityLink(
+    RwcUnidentifiedLink(
         connection = connection,
         logger = logger,
         currentRemoteIdentity = currentRemoteIdentity,
@@ -37,7 +37,7 @@ abstract class NsdPartialIdentityLink(
         protocol = protocol,
     ) {
 
-    override fun createSocket(): ReaderWriterCloser {
+    override fun createReaderWriterCloser(): ReaderWriterCloser {
         return object : ReaderWriterCloser {
             override val inputStream: InputStream
                 get() = socket.inputStream
@@ -50,22 +50,35 @@ abstract class NsdPartialIdentityLink(
             }
 
             override fun toString(): String {
-                val remoteIdentity = getIdentity()
-                val name = remoteIdentity.name
-                val address = "${socket.remoteSocketAddress}:${socket.port}"
+                val currentRemoteIdentity = getIdentity()
+                val name = currentRemoteIdentity.name
+
+                val s = StringBuilder("Socket(")
+                s.append(protocol)
+                s.append(",nsd=")
+                s.append(serviceInfo.nsdServiceType)
+
                 if (name != null) {
-                    return "Socket(nsd=${serviceInfo.nsdServiceType},$name)"
+                    s.append(',')
+                    s.append(name)
                 }
-                return "Socket(nsd=${serviceInfo.nsdServiceType},$name,$address)"
+
+                s.append(socket.remoteSocketAddress)
+                s.append(':')
+                s.append(socket.port)
+
+                s.append(')')
+
+                return s.toString()
             }
         }
     }
 
-    override fun isBonded(): Boolean {
+    override fun isPaired(): Boolean {
         return true
     }
 
-    override suspend fun advanceByBonding(): Result<Link, FailureReason> {
-        return Err(FailureReason("Device not allowed to bond."))
+    override suspend fun advancePairing(): Result<IdentifiedLink, FailureReason> {
+        return Err(FailureReason("Device not allowed to pair."))
     }
 }

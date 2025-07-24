@@ -1,10 +1,10 @@
 package io.explod.dog.manager
 
 import io.explod.dog.conn.ConnectedLink
-import io.explod.dog.conn.FullIdentityLink
+import io.explod.dog.conn.IdentifiedLink
 import io.explod.dog.conn.Link
 import io.explod.dog.conn.LinkedConnection
-import io.explod.dog.conn.PartialIdentityLink
+import io.explod.dog.conn.UnidentifiedLink
 import io.explod.dog.conn.advanceInScope
 import io.explod.dog.protocol.Protocol
 import io.explod.loggly.Logger
@@ -22,22 +22,22 @@ internal class ServerListeners(
     // Underlying link was updated.
     override fun onLinkChanged(connection: LinkedConnection, link: Link) {
         when (link) {
-            is PartialIdentityLink -> onPartialIdentityLinkChanged(connection, link)
-            is FullIdentityLink -> onFullIdentityLinkChanged(connection, link)
+            is UnidentifiedLink -> onPartialIdentityLinkChanged(connection, link)
+            is IdentifiedLink -> onFullIdentityLinkChanged(connection, link)
             is ConnectedLink -> onConnectedLinkChanged(connection, link)
         }
     }
 
     private fun onPartialIdentityLinkChanged(
         connection: LinkedConnection,
-        link: PartialIdentityLink,
+        link: UnidentifiedLink,
     ) {
         // If we're already bonded, we don't need user interaction to advance to
         // being fully identified.
-        if (link.isBonded()) {
+        if (link.isPaired()) {
             // Auto-advance.
             clearConnectionAdvance(connection, link)
-            scope.launch(ioContext) { link.advanceInScope(logger, allowBonding = false) }
+            scope.launch(ioContext) { link.advanceInScope(logger, allowPairing = false) }
         } else {
             // Otherwise, we wait for the user to manually initiate bonding.
             val advance =
@@ -45,7 +45,7 @@ internal class ServerListeners(
                     advanceReason = AdvanceReason.BOND,
                     advance = {
                         clearConnectionAdvance(connection, link)
-                        scope.launch(ioContext) { link.advanceInScope(logger, allowBonding = true) }
+                        scope.launch(ioContext) { link.advanceInScope(logger, allowPairing = true) }
                     },
                     reject = null,
                 )
@@ -53,7 +53,7 @@ internal class ServerListeners(
         }
     }
 
-    private fun onFullIdentityLinkChanged(connection: LinkedConnection, link: FullIdentityLink) {
+    private fun onFullIdentityLinkChanged(connection: LinkedConnection, link: IdentifiedLink) {
         val advance =
             Advance(
                 advanceReason = AdvanceReason.ADMIT,

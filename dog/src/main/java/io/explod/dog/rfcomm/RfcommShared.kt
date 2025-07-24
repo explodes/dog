@@ -12,8 +12,8 @@ import android.content.IntentFilter
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
-import io.explod.dog.common.IOPartialIdentityLink
-import io.explod.dog.conn.Link
+import io.explod.dog.common.RwcUnidentifiedLink
+import io.explod.dog.conn.IdentifiedLink
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol
@@ -66,7 +66,8 @@ internal class BondStateBroadcastReceiver(
     }
 }
 
-abstract class RfcommPartialIdentityLink(
+// TODO: Pairing only happens one side of the connection, so move this logic to only the side that uses it.
+abstract class RfcommUnidentifiedLink(
     connection: LinkedConnection,
     private val device: BluetoothDevice,
     logger: Logger,
@@ -76,7 +77,7 @@ abstract class RfcommPartialIdentityLink(
     protocol: Protocol,
     private val serviceInfo: ServiceInfo,
 ) :
-    IOPartialIdentityLink(
+    RwcUnidentifiedLink(
         connection = connection,
         logger = logger,
         currentRemoteIdentity = currentRemoteIdentity,
@@ -86,7 +87,7 @@ abstract class RfcommPartialIdentityLink(
     ) {
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun isBonded(): Boolean {
+    override fun isPaired(): Boolean {
         return device.bondState == BluetoothDevice.BOND_BONDED
     }
 
@@ -102,20 +103,35 @@ abstract class RfcommPartialIdentityLink(
                 socket.close()
             }
 
+            @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
             override fun toString(): String {
                 val currentRemoteIdentity = getIdentity()
                 val name = currentRemoteIdentity.name
-                return if (name != null) {
-                    "Socket(rfcomm=${serviceInfo.systemName},$name,${device.address})"
-                } else {
-                    "Socket(rfcomm=${serviceInfo.systemName},${device.address})"
+
+                val s = StringBuilder("Socket(")
+                s.append(protocol)
+                s.append(",rfcomm=")
+                s.append(serviceInfo.systemName)
+
+                if (name != null) {
+                    s.append(',')
+                    s.append(name)
                 }
+
+                if (isPaired()) {
+                    s.append(',')
+                    s.append("bond")
+                }
+
+                s.append(')')
+
+                return s.toString()
             }
         }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun advanceByBonding(): Result<Link, FailureReason> {
+    override suspend fun advancePairing(): Result<IdentifiedLink, FailureReason> {
         val receiverBondStateDeferred = CompletableDeferred<Boolean>()
         val bondStateReceiver = BondStateBroadcastReceiver(device, receiverBondStateDeferred)
         ContextCompat.registerReceiver(
@@ -131,7 +147,7 @@ abstract class RfcommPartialIdentityLink(
             val bondState = pollBondStatesWithTimeout(receiverBondStateDeferred)
             return if (bondState) {
                 logger.debug("Bonding succeeded. Advancing...")
-                advanceAlreadyBonded()
+                advancePaired()
             } else {
                 Err(FailureReason("Bonding failed."))
             }
@@ -151,7 +167,7 @@ abstract class RfcommPartialIdentityLink(
             val loop = async {
                 logger.debug("Polling for bonding state...")
                 while (isActive) {
-                    if (isBonded()) {
+                    if (isPaired()) {
                         logger.debug("Got bonded device state: ${device.deviceString}")
                         receiverBondStateDeferred.complete(true)
                         return@async true
@@ -176,7 +192,7 @@ abstract class RfcommPartialIdentityLink(
             await.cancel()
             loop.cancel()
             logger.debug("pollBondStatesWithTimeout exiting for device ${device.deviceString}")
-            isBonded()
+            isPaired()
         }
     }
 

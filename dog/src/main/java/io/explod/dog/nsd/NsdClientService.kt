@@ -4,12 +4,8 @@ import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import io.explod.dog.common.ConnectionPreferenceConf
-import io.explod.dog.common.IOConnectedLink
-import io.explod.dog.common.IOFullIdentityLink
 import io.explod.dog.common.RetrySignalConf
-import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState
-import io.explod.dog.conn.FullIdentityLink
 import io.explod.dog.conn.LinkListener
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.conn.LinkedConnectionListener
@@ -22,11 +18,7 @@ import io.explod.dog.protocol.UserInfo
 import io.explod.dog.protocol.nsdServiceType
 import io.explod.dog.util.ConfService
 import io.explod.dog.util.CoroutinePackage
-import io.explod.dog.util.FailureReason
 import io.explod.dog.util.Provider
-import io.explod.dog.util.ReaderWriterCloser
-import io.explod.dog.util.Result
-import io.explod.dog.util.Result.Companion.Ok
 import io.explod.dog.util.locked
 import io.explod.loggly.Logger
 import kotlinx.coroutines.flow.Flow
@@ -298,7 +290,7 @@ private class NsdResolveListener(
                 )
             val socket = Socket(address, port)
             val link =
-                NsdClientPartialIdentityLink(
+                NsdClientUnidentifiedLink(
                     applicationContext = applicationContext,
                     connection = connection,
                     socket = socket,
@@ -314,16 +306,16 @@ private class NsdResolveListener(
     }
 }
 
-private class NsdClientPartialIdentityLink(
+private class NsdClientUnidentifiedLink(
     connection: LinkedConnection,
-    private val socket: Socket,
+    socket: Socket,
     logger: Logger,
     currentRemoteIdentity: Identity,
     applicationContext: Context,
     userInfo: UserInfo,
     serviceInfo: ServiceInfo,
 ) :
-    NsdPartialIdentityLink(
+    NsdUnidentifiedLink(
         socket = socket,
         connection = connection,
         logger = logger,
@@ -332,67 +324,4 @@ private class NsdClientPartialIdentityLink(
         userInfo = userInfo,
         protocol = Client,
         serviceInfo = serviceInfo,
-    ) {
-    override fun createFullIdentityLink(
-        socket: ReaderWriterCloser
-    ): Result<FullIdentityLink, FailureReason> {
-        return Ok(
-            NsdClientFullIdentityLink(
-                connection = connection,
-                socket = socket,
-                logger = logger,
-                currentRemoteIdentity = getIdentity(),
-            )
-        )
-    }
-
-    override fun toString(): String {
-        return "NsdClientPartialIdentityLink(device='$socket')"
-    }
-}
-
-private class NsdClientFullIdentityLink(
-    connection: LinkedConnection,
-    socket: ReaderWriterCloser,
-    logger: Logger,
-    currentRemoteIdentity: Identity,
-) :
-    IOFullIdentityLink(
-        connection = connection,
-        socket = socket,
-        logger = logger,
-        currentRemoteIdentity = currentRemoteIdentity,
-        protocol = Client,
-    ) {
-    override fun createConnectedLink(): Result<ConnectedLink, FailureReason> {
-        return Ok(
-            NsdClientConnectedLink(
-                socket = socket,
-                connection = connection,
-                logger = logger,
-                currentRemoteIdentity = getIdentity(),
-            )
-        )
-    }
-
-    override fun toString(): String {
-        return "NsdClientFullIdentityLink(device='$socket')"
-    }
-}
-
-private class NsdClientConnectedLink(
-    private val socket: ReaderWriterCloser,
-    connection: LinkedConnection,
-    logger: Logger,
-    currentRemoteIdentity: Identity,
-) :
-    IOConnectedLink(
-        socket = socket,
-        connection = connection,
-        logger = logger,
-        currentRemoteIdentity = currentRemoteIdentity,
-    ) {
-    override fun toString(): String {
-        return "NsdClientConnectedLink(device='$socket')"
-    }
-}
+    )

@@ -3,9 +3,9 @@ package io.explod.dog.manager
 import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState.CLOSED
-import io.explod.dog.conn.FullIdentityLink
+import io.explod.dog.conn.IdentifiedLink
 import io.explod.dog.conn.Link
-import io.explod.dog.conn.PartialIdentityLink
+import io.explod.dog.conn.UnidentifiedLink
 import io.explod.dog.protocol.DedupNonce
 import io.explod.dog.protocol.Protocol
 import io.explod.dog.util.locked
@@ -59,15 +59,15 @@ internal class DeduplicatingManagedConnectionListener(
         }
         scope.launch(ioContext) {
             when (link) {
-                is PartialIdentityLink -> {
+                is UnidentifiedLink -> {
                     // Advance!! (Unless we need to bond :( )
-                    if (link.isBonded() && connection.advance != null) {
+                    if (link.isPaired() && connection.advance != null) {
                         connection.advance.advance()
                         clearAdvance()
                     }
                 }
 
-                is FullIdentityLink -> {
+                is IdentifiedLink -> {
                     // Advance!!
                     if (connection.advance != null) {
                         connection.advance.advance()

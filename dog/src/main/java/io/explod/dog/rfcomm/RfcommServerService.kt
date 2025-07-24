@@ -14,12 +14,8 @@ import android.content.Context
 import androidx.annotation.RequiresPermission
 import androidx.collection.LruCache
 import io.explod.dog.common.ConnectionPreferenceConf
-import io.explod.dog.common.IOConnectedLink
-import io.explod.dog.common.IOFullIdentityLink
 import io.explod.dog.common.RetrySignalConf
-import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.ConnectionState
-import io.explod.dog.conn.FullIdentityLink
 import io.explod.dog.conn.LinkListener
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.conn.LinkedConnectionListener
@@ -32,11 +28,8 @@ import io.explod.dog.protocol.UserInfo
 import io.explod.dog.util.BtStr
 import io.explod.dog.util.ConfService
 import io.explod.dog.util.CoroutinePackage
-import io.explod.dog.util.FailureReason
 import io.explod.dog.util.Provider
 import io.explod.dog.util.ReaderWriterCloser
-import io.explod.dog.util.Result
-import io.explod.dog.util.Result.Companion.Ok
 import io.explod.dog.util.deviceString
 import io.explod.dog.util.locked
 import io.explod.dog.util.state.PermissionsChecker
@@ -293,7 +286,7 @@ private class RfcommServerScanCallback(
                 appBytes = null,
             )
         connection.setLink(
-            RfcommServerPartialIdentityLink(
+            RfcommServerUnidentifiedLink(
                 connection = connection,
                 device = device,
                 serviceInfo = serviceInfo,
@@ -307,7 +300,7 @@ private class RfcommServerScanCallback(
     }
 }
 
-private class RfcommServerPartialIdentityLink(
+private class RfcommServerUnidentifiedLink(
     connection: LinkedConnection,
     private val device: BluetoothDevice,
     logger: Logger,
@@ -316,7 +309,7 @@ private class RfcommServerPartialIdentityLink(
     applicationContext: Context,
     private val serviceInfo: ServiceInfo,
 ) :
-    RfcommPartialIdentityLink(
+    RfcommUnidentifiedLink(
         device = device,
         connection = connection,
         logger = logger,
@@ -326,76 +319,9 @@ private class RfcommServerPartialIdentityLink(
         protocol = Server,
         serviceInfo = serviceInfo,
     ) {
-    override fun createSocket(): ReaderWriterCloser {
+    override fun createReaderWriterCloser(): ReaderWriterCloser {
         val socket = device.createInsecureRfcommSocketToServiceRecord(serviceInfo.uuid)
         socket.connect()
         return createSocket(socket)
-    }
-
-    override fun createFullIdentityLink(
-        socket: ReaderWriterCloser
-    ): Result<FullIdentityLink, FailureReason> {
-        return Ok(
-            RfcommServerFullIdentityLink(
-                socket = socket,
-                device = device,
-                connection = connection,
-                logger = logger,
-                currentRemoteIdentity = getIdentity(),
-            )
-        )
-    }
-
-    override fun toString(): String {
-        return "RfcommServerPartialIdentityLink(device='${device.deviceString}')"
-    }
-}
-
-private class RfcommServerFullIdentityLink(
-    socket: ReaderWriterCloser,
-    private val device: BluetoothDevice,
-    connection: LinkedConnection,
-    logger: Logger,
-    currentRemoteIdentity: Identity,
-) :
-    IOFullIdentityLink(
-        connection = connection,
-        socket = socket,
-        logger = logger,
-        currentRemoteIdentity = currentRemoteIdentity,
-        protocol = Server,
-    ) {
-    override fun createConnectedLink(): Result<ConnectedLink, FailureReason> {
-        return Ok(
-            RfcommServerConnectedLink(
-                socket = socket,
-                device = device,
-                connection = connection,
-                logger = logger,
-                currentRemoteIdentity = getIdentity(),
-            )
-        )
-    }
-
-    override fun toString(): String {
-        return "RfcommServerFullIdentityLink(device='${device.deviceString}')"
-    }
-}
-
-private class RfcommServerConnectedLink(
-    socket: ReaderWriterCloser,
-    private val device: BluetoothDevice,
-    connection: LinkedConnection,
-    logger: Logger,
-    currentRemoteIdentity: Identity,
-) :
-    IOConnectedLink(
-        socket = socket,
-        connection = connection,
-        logger = logger,
-        currentRemoteIdentity = currentRemoteIdentity,
-    ) {
-    override fun toString(): String {
-        return "RfcommServerConnectedLink(device='${device.deviceString}')"
     }
 }

@@ -3,7 +3,7 @@ package io.explod.dog.common
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.explod.dog.conn.FullIdentityLink
+import io.explod.dog.conn.IdentifiedLink
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.protocol.ConnectionType
 import io.explod.dog.protocol.DeviceType
@@ -11,7 +11,7 @@ import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.UserInfo
 import io.explod.dog.testing.FakeProtocol
 import io.explod.dog.testing.FakeReaderWriterCloser
-import io.explod.dog.testing.IOPartialIdentityLinkTestImpl
+import io.explod.dog.testing.RwcUnidentifiedLinkTestImpl
 import io.explod.dog.util.ImmutableBytes
 import io.explod.dog.util.ReaderWriterCloser
 import io.explod.loggly.Logger
@@ -31,7 +31,7 @@ class IOPartialIdentityLinkTest {
     private lateinit var connection: LinkedConnection
     private lateinit var socket: ReaderWriterCloser
     private lateinit var protocol: FakeProtocol
-    private lateinit var factory: IOPartialIdentityLinkTestImpl.Factory
+    private lateinit var factory: RwcUnidentifiedLinkTestImpl.Factory
 
     @Before
     fun setUp() {
@@ -58,7 +58,7 @@ class IOPartialIdentityLinkTest {
                     )
             )
         factory =
-            IOPartialIdentityLinkTestImpl.Factory(
+            RwcUnidentifiedLinkTestImpl.Factory(
                 applicationContext = applicationContext,
                 connection = connection,
                 logger = logger,
@@ -77,7 +77,7 @@ class IOPartialIdentityLinkTest {
 
         result
             .err { reason -> fail("Advance failed: $reason") }
-            .ok { assert(it is FullIdentityLink) }
+            .ok { @Suppress("USELESS_IS_CHECK") assert(it is IdentifiedLink) }
     }
 
     @Test
@@ -97,6 +97,6 @@ class IOPartialIdentityLinkTest {
 
         result
             .err { reason -> fail("Advance failed: $reason") }
-            .ok { assert(it is FullIdentityLink) }
+            .ok { @Suppress("USELESS_IS_CHECK") assert(it is IdentifiedLink) }
     }
 }

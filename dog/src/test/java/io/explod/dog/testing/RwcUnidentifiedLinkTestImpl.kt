@@ -1,9 +1,8 @@
 package io.explod.dog.testing
 
 import android.content.Context
-import io.explod.dog.common.IOPartialIdentityLink
-import io.explod.dog.conn.FullIdentityLink
-import io.explod.dog.conn.Link
+import io.explod.dog.common.RwcUnidentifiedLink
+import io.explod.dog.conn.IdentifiedLink
 import io.explod.dog.conn.LinkedConnection
 import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.Protocol
@@ -11,11 +10,10 @@ import io.explod.dog.protocol.UserInfo
 import io.explod.dog.util.FailureReason
 import io.explod.dog.util.ReaderWriterCloser
 import io.explod.dog.util.Result
-import io.explod.dog.util.mapOk
 import io.explod.loggly.Logger
 import io.mockk.mockk
 
-class IOPartialIdentityLinkTestImpl(
+class RwcUnidentifiedLinkTestImpl(
     applicationContext: Context,
     connection: LinkedConnection,
     logger: Logger,
@@ -25,7 +23,7 @@ class IOPartialIdentityLinkTestImpl(
     private val socket: ReaderWriterCloser,
     private val bonded: Boolean,
 ) :
-    IOPartialIdentityLink(
+    RwcUnidentifiedLink(
         applicationContext = applicationContext,
         connection = connection,
         logger = logger,
@@ -34,22 +32,16 @@ class IOPartialIdentityLinkTestImpl(
         userInfo = userInfo,
     ) {
 
-    override fun isBonded(): Boolean {
+    override fun isPaired(): Boolean {
         return bonded
     }
 
-    override fun createSocket(): ReaderWriterCloser {
+    override fun createReaderWriterCloser(): ReaderWriterCloser {
         return socket
     }
 
-    override suspend fun advanceByBonding(): Result<Link, FailureReason> {
-        return createFullIdentityLink(socket).mapOk { it as Link }
-    }
-
-    override fun createFullIdentityLink(
-        socket: ReaderWriterCloser
-    ): Result<FullIdentityLink, FailureReason> {
-        return Result.Companion.Ok(mockk<FullIdentityLink>())
+    override suspend fun advancePairing(): Result<IdentifiedLink, FailureReason> {
+        return Result.Companion.Ok(mockk<IdentifiedLink>()) // skip identity protocol by not calling advancePaired()
     }
 
     class Factory(
@@ -61,8 +53,8 @@ class IOPartialIdentityLinkTestImpl(
         private val socket: ReaderWriterCloser,
         private val protocol: Protocol,
     ) {
-        fun create(bonded: Boolean): IOPartialIdentityLinkTestImpl {
-            return IOPartialIdentityLinkTestImpl(
+        fun create(bonded: Boolean): RwcUnidentifiedLinkTestImpl {
+            return RwcUnidentifiedLinkTestImpl(
                 applicationContext = applicationContext,
                 connection = connection,
                 logger = logger,
