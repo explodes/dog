@@ -11,7 +11,6 @@ composeBom = "2025.07.00"
 appcompat = "1.7.1"
 material = "1.12.0"
 viewmodel = "2.9.2"
-dog = "0.0.2"
 truth = "1.4.4"
 mockk = "1.14.5"
 test = "1.7.0-rc01"
@@ -39,9 +38,6 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 androidx-test = { group = "androidx.test", name = "core-ktx", version.ref = "test" }
 androidx-junit-runner = { group = "androidx.test", name = "runner", version.ref = "test" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-dog = { group = "com.github.explodes.dog", name = "dog", version.ref = "dog" }
-dog-compose = { group = "com.github.explodes.dog", name = "dog-compose", version.ref = "dog" }
-dog-loggly = { group = "com.github.explodes.dog", name = "loggly", version.ref = "dog" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }

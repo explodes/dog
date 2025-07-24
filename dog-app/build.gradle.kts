@@ -40,9 +40,9 @@ android {
 }
 
 dependencies {
-    implementation(libs.dog)
-    implementation(libs.dog.compose)
-    implementation(libs.dog.loggly)
+    implementation(project(":dog"))
+    implementation(project(":dog-compose"))
+    implementation(project(":loggly"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
