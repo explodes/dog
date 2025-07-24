@@ -23,22 +23,14 @@ Turns out, (a) it's really cool, and (b) yes we can.
 The Dog code is split between the core module (`dog`) and optional UI code that leverages compose (
 `dog-compose`.) Additionally, there is a test application, and a logging utility.
 
-#### `dog`
-
 `dog` is the core library. This provides the functionality for device discovery and advertising with
 different [technologies](#technologies).
-
-#### `dog-compose`
 
 `dog-compose` is a companion library that provides a device picker UI and returns connections to the
 application.
 
-#### `dog-app`
-
 `dog-app` is an app you can use to connect to nearby devices! The apps logs are drawn in the
 background for easier debugging.
-
-#### `loggly`
 
 `loggly` is a bad abstraction for logging that was useful initially, but needs to be replaced with a
 more robust mechanism.

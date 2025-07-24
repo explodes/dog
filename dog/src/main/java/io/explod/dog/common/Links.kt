@@ -112,7 +112,7 @@ abstract class RwcUnidentifiedLink(
 
     override fun toString(): String {
         val rwc = rwcRef.load()
-        return "RwcIdentifiedLink(conn=$rwc,remote=${getIdentity()})"
+        return "RwcUnidentifiedLink(conn=$rwc,remote=${getIdentity()})"
     }
 }
 
@@ -162,9 +162,9 @@ abstract class RwcUnidentifiedLink(
 
 /** At least for now, the implementation is identical between Sever and Client. */
  class RwcConnectedLink(
-    protected val connection: LinkedConnection,
+    private val connection: LinkedConnection,
     private val rwc: ReaderWriterCloser,
-    protected val logger: Logger,
+    private val logger: Logger,
     private val currentRemoteIdentity: Identity,
 ) : ConnectedLink(connection.chainId) {
     override suspend fun send(bytes: ByteArray): Result<Ok, FailureReason> {
@@ -193,5 +193,9 @@ abstract class RwcUnidentifiedLink(
 
     override suspend fun close() {
         closeLink(connection, rwc, logger, ConnectionState.CLOSED)
+    }
+
+    override fun toString(): String {
+        return "RwcConnectedLink(conn=$rwc,remote=$currentRemoteIdentity)"
     }
 }

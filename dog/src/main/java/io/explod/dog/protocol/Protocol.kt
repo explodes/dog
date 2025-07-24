@@ -138,6 +138,10 @@ interface Protocol {
             val remoteNonce = longBuff.getLong(0)
             return Ok(DedupNonce(remoteNonce))
         }
+
+        override fun toString(): String {
+            return "Client"
+        }
     }
 
     object Server : Protocol {
@@ -224,6 +228,10 @@ interface Protocol {
 
             return Ok(DedupNonce(remoteNonce))
         }
+
+        override fun toString(): String {
+            return "Server"
+        }
     }
 
     enum class Join(internal val value: Int) {
@@ -245,12 +253,13 @@ interface Protocol {
                 val name = inputStream.readVarintLengthAndArray()?.let { String(it) }
                 val appBytes =
                     inputStream.readVarintLengthAndArray()?.let { ImmutableBytes.create(it) }
-                val identity = Identity(
-                    name = name,
-                    connectionType = connectionType,
-                    deviceType = deviceType,
-                    appBytes = appBytes,
-                )
+                val identity =
+                    Identity(
+                        name = name,
+                        connectionType = connectionType,
+                        deviceType = deviceType,
+                        appBytes = appBytes,
+                    )
                 return Ok(identity)
             }
 
