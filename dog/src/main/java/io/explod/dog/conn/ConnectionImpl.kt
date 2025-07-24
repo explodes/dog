@@ -81,9 +81,9 @@ internal class LinkedConnectionImpl(override val chainId: ChainId, private val l
                 return@locked
             }
             logger.debug("Closing connection...")
+            linkState.connectedLinkPromise.cancel()
             linkState.closed = true
-            // Will not override other terminal states.
-            stateListeners.set(ConnectionState.CLOSED)
+            stateListeners.set(ConnectionState.CLOSED) // Will not override other terminal states.
             linkState.activeLink?.let { runBlocking { it.close() } }
         }
     }
