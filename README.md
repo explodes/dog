@@ -52,13 +52,14 @@ The idea is to add more capabilities, such as Android Nearby, Cross Device SDK, 
 Chip/Matter, maybe Zigbee? You get the idea.
 
 Now that the proof of concept has been established, the hardcoded technologies should be adapted to
-a more plug and play style to allow 3rd party packages to plug in their connection strategies and to
-remove dependency bloat from strategies that aren't desired.
+a more plug and play style to allow 3rd party packages to plug in their connection strategies as
+separate dependencies.
 
 ### Dog
 
-The `dog` module itself includes a pattern for connection devices that allows for returning control
-back to the user. This enables user interaction between any step, vital or not, such as:
+The `dog` module itself includes a pattern that allows for returning control back to the user while
+discovery or establishing a connection. This enables user interaction between any step, vital or
+not, such as:
 
 - Finding a client or server
 - Prompting to begin Bluetooth pairing
