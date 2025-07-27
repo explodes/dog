@@ -1,4 +1,4 @@
-package io.explod.dog.manager
+package io.explod.dog
 
 import io.explod.dog.conn.ConnectedLink
 import io.explod.dog.conn.IdentifiedLink
@@ -12,9 +12,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-internal class ServerListeners(
+internal class ClientListeners(
     private val scope: CoroutineScope,
     private val ioContext: CoroutineContext,
+    private val eagerMode: Boolean,
     private val logger: Logger,
     managedConnectionListener: ManagedConnectionListener,
 ) : Listeners(managedConnectionListener, logger) {
@@ -32,41 +33,33 @@ internal class ServerListeners(
         connection: LinkedConnection,
         link: UnidentifiedLink,
     ) {
-        // If we're already bonded, we don't need user interaction to advance to
-        // being fully identified.
-        if (link.isPaired()) {
-            // Auto-advance.
+        if (eagerMode) {
             clearConnectionAdvance(connection, link)
             scope.launch(ioContext) { link.advanceInScope(logger, allowPairing = false) }
         } else {
-            // Otherwise, we wait for the user to manually initiate bonding.
             val advance =
                 Advance(
-                    advanceReason = AdvanceReason.BOND,
+                    advanceReason = AdvanceReason.JOIN,
                     advance = {
                         clearConnectionAdvance(connection, link)
-                        scope.launch(ioContext) { link.advanceInScope(logger, allowPairing = true) }
+                        scope.launch(ioContext) {
+                            link.advanceInScope(logger, allowPairing = false)
+                        }
                     },
-                    reject = null,
+                    reject = {
+                        clearConnectionAdvance(connection, link)
+                        scope.launch(ioContext) { connection.close() }
+                    },
                 )
             updateConnectionAdvance(connection, link, advance)
         }
     }
 
     private fun onFullIdentityLinkChanged(connection: LinkedConnection, link: IdentifiedLink) {
-        val advance =
-            Advance(
-                advanceReason = AdvanceReason.ADMIT,
-                advance = {
-                    clearConnectionAdvance(connection, link)
-                    scope.launch(ioContext) { link.advanceInScope(Protocol.Join.ACCEPT, logger) }
-                },
-                reject = {
-                    clearConnectionAdvance(connection, link)
-                    scope.launch(ioContext) { link.advanceInScope(Protocol.Join.REJECT, logger) }
-                },
-            )
-        updateConnectionAdvance(connection, link, advance)
+        // Joining the server is completed by the user on the server.
+        // We wait here for the connection to to be established.
+        clearConnectionAdvance(connection, link)
+        scope.launch(ioContext) { link.advanceInScope(Protocol.Join.ACCEPT, logger) }
     }
 
     private fun onConnectedLinkChanged(connection: LinkedConnection, link: ConnectedLink) {

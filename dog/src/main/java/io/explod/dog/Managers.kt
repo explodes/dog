@@ -1,4 +1,4 @@
-package io.explod.dog.manager
+package io.explod.dog
 
 import io.explod.dog.conn.ChainId
 import io.explod.dog.conn.Connection

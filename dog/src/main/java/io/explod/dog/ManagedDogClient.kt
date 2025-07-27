@@ -1,8 +1,7 @@
 @file:Suppress("unused")
 
-package io.explod.dog.manager
+package io.explod.dog
 
-import io.explod.dog.Dog
 import io.explod.dog.protocol.DedupNonce
 import io.explod.dog.protocol.Protocol
 import io.explod.dog.protocol.UserInfo
@@ -14,10 +13,8 @@ import kotlin.random.Random
 
 /**
  * Manages Dog client connections. Devices changes are reported in a consistent manner.
- *
- * TODO: Deduplication!!!
  */
-class DogClientManager(
+class ManagedDogClient(
     dog: Dog,
     scope: CoroutineScope,
     ioContext: CoroutineContext,

@@ -2,8 +2,8 @@ package io.explod.dog_compose
 
 import androidx.lifecycle.ViewModel
 import io.explod.dog.conn.ConnectionState
-import io.explod.dog.manager.AdvanceReason
-import io.explod.dog.manager.ConnectionInformation
+import io.explod.dog.AdvanceReason
+import io.explod.dog.ConnectionInformation
 import io.explod.dog.protocol.DeviceType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

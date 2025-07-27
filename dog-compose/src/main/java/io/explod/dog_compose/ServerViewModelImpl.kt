@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import io.explod.dog.Dog
-import io.explod.dog.manager.ConnectionInformation
-import io.explod.dog.manager.DogServerManager
+import io.explod.dog.ConnectionInformation
+import io.explod.dog.ManagedDogServer
 import io.explod.dog.protocol.UserInfo
 import io.explod.dog.util.CoroutinePackage
 import io.explod.loggly.Logger
@@ -22,8 +22,8 @@ internal class ServerViewModelImpl(
     private val userInfo: UserInfo,
 ) : ServerViewModel() {
 
-    private val dogServerManager by lazy {
-        DogServerManager(
+    private val managedDogServer by lazy {
+        ManagedDogServer(
             dog = dog,
             scope = viewModelScope,
             ioContext = io.context,
@@ -39,11 +39,11 @@ internal class ServerViewModelImpl(
     }
 
     override fun startSearch() {
-        dogServerManager.startServer(userInfo)
+        managedDogServer.startServer(userInfo)
     }
 
     override fun stopSearch() {
-        dogServerManager.stopServer()
+        managedDogServer.stopServer()
     }
 
     override fun onCleared() {
