@@ -51,7 +51,9 @@ abstract class RwcUnidentifiedLink(
     @Throws(IOException::class)
     protected abstract fun createReaderWriterCloser(): ReaderWriterCloser
 
-    /** Advance using out-of-band pairing followed up by identifying with a call to advancePaired() */
+    /**
+     * Advance using out-of-band pairing followed up by identifying with a call to advancePaired()
+     */
     protected abstract suspend fun advancePairing(): Result<IdentifiedLink, FailureReason>
 
     protected fun advancePaired(): Result<IdentifiedLink, FailureReason> {
@@ -116,18 +118,18 @@ abstract class RwcUnidentifiedLink(
     }
 }
 
- class RwcIdentifiedLink(
-     private val connection: LinkedConnection,
-     private val rwc: ReaderWriterCloser,
-     private val logger: Logger,
-     private val currentRemoteIdentity: Identity,
-     private val protocol: Protocol,
+class RwcIdentifiedLink(
+    private val connection: LinkedConnection,
+    private val rwc: ReaderWriterCloser,
+    private val logger: Logger,
+    private val currentRemoteIdentity: Identity,
+    private val protocol: Protocol,
 ) : IdentifiedLink(connection.chainId) {
 
     override suspend fun advance(join: Protocol.Join): Result<ConnectedLink, FailureReason> {
         handleJoin(connection, rwc, logger) {
-            protocol.join(rwc.inputStream, rwc.outputStream, logger, join)
-        }
+                protocol.join(rwc.inputStream, rwc.outputStream, logger, join)
+            }
             .err {
                 return@advance Err(it)
             }
@@ -155,13 +157,13 @@ abstract class RwcUnidentifiedLink(
         closeLink(connection, rwc, logger, ConnectionState.CLOSED)
     }
 
-     override fun toString(): String {
-         return "RwcIdentifiedLink(conn=$rwc,remote=$currentRemoteIdentity)"
-     }
+    override fun toString(): String {
+        return "RwcIdentifiedLink(conn=$rwc,remote=$currentRemoteIdentity)"
+    }
 }
 
 /** At least for now, the implementation is identical between Sever and Client. */
- class RwcConnectedLink(
+class RwcConnectedLink(
     private val connection: LinkedConnection,
     private val rwc: ReaderWriterCloser,
     private val logger: Logger,

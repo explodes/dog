@@ -23,6 +23,9 @@ inline fun <A, B, Err> Result<A, Err>.mapOk(ok: (A) -> B): Result<B, Err> {
         val nextValue = ok(original)
         return@mapOk Result.Ok(nextValue)
     }
+    err {
+        return@mapOk Result.Err(it)
+    }
     throw IllegalStateException("Should never get here")
 }
 
@@ -35,6 +38,9 @@ inline fun <A, B, Err> Result<A, Err>.flatMapOk(ok: (A) -> Result<B, Err>): Resu
     ok { original ->
         val nextResult = ok(original)
         return@flatMapOk nextResult
+    }
+    err {
+        return@flatMapOk Result.Err(it)
     }
     throw IllegalStateException("Should never get here")
 }
@@ -54,6 +60,9 @@ inline fun <A, B, Err> Result<A, Err>.flatOk(ok: (A) -> Result<B, Err>): Result<
         val nextError = ok(original)
         return@flatOk nextError.mapOk { next -> original }
     }
+    err {
+        return@flatOk Result.Err(it)
+    }
     throw IllegalStateException("Should never get here")
 }
 
@@ -62,6 +71,9 @@ inline fun <Ok, A, B> Result<Ok, A>.mapErr(err: (A) -> B): Result<Ok, B> {
     contract { callsInPlace(err, InvocationKind.AT_MOST_ONCE) }
     err {
         return@mapErr Result.Err(err(it))
+    }
+    ok {
+        return@mapErr Result.Ok(it)
     }
     throw IllegalStateException("Should never get here")
 }
@@ -74,6 +86,9 @@ inline fun <Ok, A, B> Result<Ok, A>.flatMapErr(err: (A) -> Result<Ok, B>): Resul
     contract { callsInPlace(err, InvocationKind.AT_MOST_ONCE) }
     err {
         return@flatMapErr err(it)
+    }
+    ok {
+        return@flatMapErr Result.Ok(it)
     }
     throw IllegalStateException("Should never get here")
 }
@@ -92,6 +107,9 @@ inline fun <Ok, A, B> Result<Ok, A>.flatErr(err: (A) -> Result<Ok, B>): Result<O
     err { a: A ->
         val nextResult: Result<Ok, B> = err(a)
         return@flatErr nextResult.mapErr { b -> a }
+    }
+    ok {
+        return@flatErr Result.Ok(it)
     }
     throw IllegalStateException("Should never get here")
 }

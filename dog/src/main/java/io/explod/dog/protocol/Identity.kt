@@ -10,10 +10,10 @@ import io.explod.dog.util.ImmutableBytes
 import java.util.Locale
 
 data class Identity(
-    val name: String?,
-    val deviceType: DeviceType?,
-    val connectionType: ConnectionType?,
-    val appBytes: ImmutableBytes?,
+    val name: String? = null,
+    val deviceType: DeviceType? = null,
+    val connectionType: ConnectionType? = null,
+    val appBytes: ImmutableBytes? = null,
 )
 
 fun createIdentity(

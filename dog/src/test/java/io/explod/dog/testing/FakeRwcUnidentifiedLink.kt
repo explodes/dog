@@ -13,7 +13,7 @@ import io.explod.dog.util.Result
 import io.explod.loggly.Logger
 import io.mockk.mockk
 
-class RwcUnidentifiedLinkTestImpl(
+class FakeRwcUnidentifiedLink(
     applicationContext: Context,
     connection: LinkedConnection,
     logger: Logger,
@@ -41,7 +41,8 @@ class RwcUnidentifiedLinkTestImpl(
     }
 
     override suspend fun advancePairing(): Result<IdentifiedLink, FailureReason> {
-        return Result.Companion.Ok(mockk<IdentifiedLink>()) // skip identity protocol by not calling advancePaired()
+        // skip identity protocol by not calling advancePaired()
+        return Result.Companion.Ok(mockk<IdentifiedLink>())
     }
 
     class Factory(
@@ -53,8 +54,8 @@ class RwcUnidentifiedLinkTestImpl(
         private val socket: ReaderWriterCloser,
         private val protocol: Protocol,
     ) {
-        fun create(bonded: Boolean): RwcUnidentifiedLinkTestImpl {
-            return RwcUnidentifiedLinkTestImpl(
+        fun create(bonded: Boolean): FakeRwcUnidentifiedLink {
+            return FakeRwcUnidentifiedLink(
                 applicationContext = applicationContext,
                 connection = connection,
                 logger = logger,

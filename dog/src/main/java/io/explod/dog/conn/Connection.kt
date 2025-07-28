@@ -16,7 +16,7 @@ interface Connection : Closeable {
     val name: String
         get() {
             val identity = getIdentity()
-            return identity?.name ?: createName(identity?.deviceType, identity?.connectionType)
+            return identity?.name ?: connectionName(identity?.deviceType, identity?.connectionType)
         }
 
     /**

@@ -3,7 +3,7 @@ package io.explod.dog.conn
 import io.explod.dog.protocol.ConnectionType
 import io.explod.dog.protocol.DeviceType
 
-internal fun createName(deviceType: DeviceType?, connectionType: ConnectionType?): String {
+internal fun connectionName(deviceType: DeviceType?, connectionType: ConnectionType?): String {
     return when (deviceType) {
         DeviceType.PHONE ->
             when (connectionType) {

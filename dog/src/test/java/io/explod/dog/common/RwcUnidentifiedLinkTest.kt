@@ -11,19 +11,20 @@ import io.explod.dog.protocol.Identity
 import io.explod.dog.protocol.UserInfo
 import io.explod.dog.testing.FakeProtocol
 import io.explod.dog.testing.FakeReaderWriterCloser
-import io.explod.dog.testing.RwcUnidentifiedLinkTestImpl
+import io.explod.dog.testing.FakeRwcUnidentifiedLink
+import io.explod.dog.testing.isErr
+import io.explod.dog.testing.isOk
 import io.explod.dog.util.ImmutableBytes
 import io.explod.dog.util.ReaderWriterCloser
 import io.explod.loggly.Logger
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class IOPartialIdentityLinkTest {
+class RwcUnidentifiedLinkTest {
     private lateinit var applicationContext: Context
     private lateinit var userInfo: UserInfo
     private lateinit var currentRemoteIdentity: Identity
@@ -31,7 +32,7 @@ class IOPartialIdentityLinkTest {
     private lateinit var connection: LinkedConnection
     private lateinit var socket: ReaderWriterCloser
     private lateinit var protocol: FakeProtocol
-    private lateinit var factory: RwcUnidentifiedLinkTestImpl.Factory
+    private lateinit var factory: FakeRwcUnidentifiedLink.Factory
 
     @Before
     fun setUp() {
@@ -58,7 +59,7 @@ class IOPartialIdentityLinkTest {
                     )
             )
         factory =
-            RwcUnidentifiedLinkTestImpl.Factory(
+            FakeRwcUnidentifiedLink.Factory(
                 applicationContext = applicationContext,
                 connection = connection,
                 logger = logger,
@@ -75,9 +76,7 @@ class IOPartialIdentityLinkTest {
 
         val result = runBlocking { underTest.advance(false) }
 
-        result
-            .err { reason -> fail("Advance failed: $reason") }
-            .ok { @Suppress("USELESS_IS_CHECK") assert(it is IdentifiedLink) }
+        result.isOk { @Suppress("USELESS_IS_CHECK") assert(it is IdentifiedLink) }
     }
 
     @Test
@@ -86,7 +85,7 @@ class IOPartialIdentityLinkTest {
 
         val result = runBlocking { underTest.advance(false) }
 
-        result.ok { fail("Advance succeeded unexpectedly: $it") }
+        result.isErr()
     }
 
     @Test
@@ -95,8 +94,6 @@ class IOPartialIdentityLinkTest {
 
         val result = runBlocking { underTest.advance(true) }
 
-        result
-            .err { reason -> fail("Advance failed: $reason") }
-            .ok { @Suppress("USELESS_IS_CHECK") assert(it is IdentifiedLink) }
+        result.isOk { @Suppress("USELESS_IS_CHECK") assert(it is IdentifiedLink) }
     }
 }
